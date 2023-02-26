@@ -1,8 +1,8 @@
 /*
  * @Author: lmio
  * @Date: 2023-02-18 16:43:54
- * @LastEditTime: 2023-02-26 12:04:59
- * @FilePath: /opengl/rabbit.go
+ * @LastEditTime: 2023-02-26 15:42:24
+ * @FilePath: /opengl/Rabbit/rabbit.go
  * @Description:兔子模型
  */
 package main
@@ -86,7 +86,7 @@ func main() {
 	gl.ClearColor(0.2, 0.3, 0.3, 1.0)
 
 	// 读取off文件
-	vertices, indices, _, err := glutils.ReadOFFFile("bunny10k.off")
+	vertices, indices, _, err := glutils.ReadOFFFile("Rabbit/bunny10k.off")
 	if err != nil {
 		log.Fatalln("failed to read off file!", err)
 	}

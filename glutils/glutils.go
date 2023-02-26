@@ -1,7 +1,7 @@
 /*
  * @Author: lmio
  * @Date: 2023-02-19 17:55:39
- * @LastEditTime: 2023-02-26 12:03:19
+ * @LastEditTime: 2023-02-26 15:44:00
  * @FilePath: /opengl/glutils/glutils.go
  * @Description:
  */
