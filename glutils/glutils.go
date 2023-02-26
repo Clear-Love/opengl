@@ -1,7 +1,7 @@
 /*
  * @Author: lmio
  * @Date: 2023-02-19 17:55:39
- * @LastEditTime: 2023-02-19 18:50:50
+ * @LastEditTime: 2023-02-26 12:03:19
  * @FilePath: /opengl/glutils/glutils.go
  * @Description:
  */
@@ -13,7 +13,7 @@ import (
 	"os"
 	"strings"
 	"github.com/go-gl/gl/v4.1-core/gl"
-	"github.com/go-gl/glfw/v3.1/glfw"
+	"github.com/go-gl/glfw/v3.3/glfw"
 )
 
 // initGlfw 初始化 glfw，返回一个可用的 Window
