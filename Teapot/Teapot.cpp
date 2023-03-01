@@ -12,9 +12,7 @@
 // 初始化OpenGL的函数
 void init(void)
 {
-    // 启用深度测试，避免遮挡问题
-    glEnable(GL_DEPTH_TEST);
-
+    // 启用深度测试，避免遮挡问题 glEnable(GL_DEPTH_TEST);
     // 设置光源的位置
     GLfloat position[] = {1.0, 1.0, 1.0, 0.0};
     glLightfv(GL_LIGHT0, GL_POSITION, position);

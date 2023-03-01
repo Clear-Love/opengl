@@ -1,38 +1,18 @@
 /*
  * @Author: lmio
- * @Date: 2023-02-19 17:55:39
- * @LastEditTime: 2023-02-26 15:44:00
- * @FilePath: /opengl/glutils/glutils.go
- * @Description:
+ * @Date: 2023-03-01 00:17:21
+ * @LastEditTime: 2023-03-01 00:23:33
+ * @FilePath: /opengl/glutils/utils.go
+ * @Description:常用函数
  */
 package glutils
 
 import (
 	"fmt"
+	"github.com/go-gl/gl/v4.1-core/gl"
 	"log"
 	"os"
-	"strings"
-	"github.com/go-gl/gl/v4.1-core/gl"
-	"github.com/go-gl/glfw/v3.3/glfw"
 )
-
-// initGlfw 初始化 glfw，返回一个可用的 Window
-func InitGlfw(width, height int) *glfw.Window {
-	if err := glfw.Init(); err != nil {
-		panic(err)
-	}
-	glfw.WindowHint(glfw.Resizable, glfw.False)
-	glfw.WindowHint(glfw.ContextVersionMajor, 4)
-	glfw.WindowHint(glfw.ContextVersionMinor, 1)
-	glfw.WindowHint(glfw.OpenGLProfile, glfw.OpenGLCoreProfile)
-	glfw.WindowHint(glfw.OpenGLForwardCompatible, glfw.True)
-	window, err := glfw.CreateWindow(width, height, "Conway's Game of Life", nil, nil)
-	if err != nil {
-		panic(err)
-	}
-	window.MakeContextCurrent()
-	return window
-}
 
 // initOpenGL 初始化 OpenGL
 func InitOpenGL() {
@@ -41,64 +21,6 @@ func InitOpenGL() {
 	}
 	version := gl.GoStr(gl.GetString(gl.VERSION))
 	log.Println("OpenGL version", version)
-}
-
-func NewProgram(vertexShaderSource, fragmentShaderSource string) (uint32, error) {
-	vertexShader, err := CompileShader(vertexShaderSource, gl.VERTEX_SHADER)
-	if err != nil {
-		return 0, err
-	}
-
-	fragmentShader, err := CompileShader(fragmentShaderSource, gl.FRAGMENT_SHADER)
-	if err != nil {
-		return 0, err
-	}
-
-	program := gl.CreateProgram()
-
-	gl.AttachShader(program, vertexShader)
-	gl.AttachShader(program, fragmentShader)
-	gl.LinkProgram(program)
-
-	var status int32
-	gl.GetProgramiv(program, gl.LINK_STATUS, &status)
-	if status == gl.FALSE {
-		var logLength int32
-		gl.GetProgramiv(program, gl.INFO_LOG_LENGTH, &logLength)
-
-		log := strings.Repeat("\x00", int(logLength+1))
-		gl.GetProgramInfoLog(program, logLength, nil, gl.Str(log))
-
-		return 0, fmt.Errorf("failed to link program: %v", log)
-	}
-
-	gl.DeleteShader(vertexShader)
-	gl.DeleteShader(fragmentShader)
-
-	return program, nil
-}
-
-func CompileShader(source string, shaderType uint32) (uint32, error) {
-	shader := gl.CreateShader(shaderType)
-
-	csources, free := gl.Strs(source)
-	gl.ShaderSource(shader, 1, csources, nil)
-	free()
-	gl.CompileShader(shader)
-
-	var status int32
-	gl.GetShaderiv(shader, gl.COMPILE_STATUS, &status)
-	if status == gl.FALSE {
-		var logLength int32
-		gl.GetShaderiv(shader, gl.INFO_LOG_LENGTH, &logLength)
-
-		log := strings.Repeat("\x00", int(logLength+1))
-		gl.GetShaderInfoLog(shader, logLength, nil, gl.Str(log))
-
-		return 0, fmt.Errorf("failed to compile %v: %v", source, log)
-	}
-
-	return shader, nil
 }
 
 func ReadOFFFile(filename string) ([]float32, []uint32, []uint32, error) {
@@ -147,7 +69,7 @@ func ReadOFFFile(filename string) ([]float32, []uint32, []uint32, error) {
 	tetrahedras := make([]uint32, numTetrahedra*4)
 	for i := 0; i < numTetrahedra; i++ {
 		var n int
-		if _, err := fmt.Fscanf(file, "%d %d %d %d", &n, &tetrahedras[i*3], &tetrahedras[i*3+1], &tetrahedras[i*3+2]); err != nil {
+		if _, err := fmt.Fscanf(file, "%d %d %d %d %d", &n, &tetrahedras[i*4], &tetrahedras[i*4+1], &tetrahedras[i*4+2], &tetrahedras[i*4+3]); err != nil {
 			return nil, nil, nil, err
 		}
 		if n != 4 {
@@ -158,6 +80,7 @@ func ReadOFFFile(filename string) ([]float32, []uint32, []uint32, error) {
 	return vertices, indices, tetrahedras, nil
 }
 
+// 给定顶点坐标和三角形索引，返回顶点数组对象
 func CreateVertexArrayObject(vertices []float32, indices []uint32) uint32 {
 	var vao uint32
 	gl.GenVertexArrays(1, &vao)
