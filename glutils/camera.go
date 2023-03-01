@@ -36,7 +36,7 @@ func NewCamera(cameraUniform int32, cameraPos, cameraFront, cameraUp mgl32.Vec3)
 		cameraPos,
 		cameraFront,
 		cameraUp,
-		0.1,
+		0.05,
 		0.1,
 	}
 }

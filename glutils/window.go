@@ -1,7 +1,7 @@
 /*
  * @Author: lmio
  * @Date: 2023-02-19 17:55:39
- * @LastEditTime: 2023-03-01 16:31:19
+ * @LastEditTime: 2023-03-01 17:36:46
  * @FilePath: /opengl/glutils/window.go
  * @Description:
  */
@@ -9,9 +9,12 @@ package glutils
 
 import (
 	"math"
+
 	"github.com/go-gl/glfw/v3.3/glfw"
 	"github.com/go-gl/mathgl/mgl32"
 )
+
+var move func()
 
 type Window struct {
 	*glfw.Window
@@ -39,6 +42,9 @@ func NewWindow(width, height int) (*Window, error) {
 
 func (w *Window) Display(f func()) {
 	for !w.ShouldClose() {
+		if move != nil {
+			move()
+		}
 		f()
 	}
 }
@@ -100,22 +106,41 @@ func (w *Window) EnableMoveCameraFront(c *Camera) {
 }
 
 func (w *Window) EnableMoveCameraPos(c *Camera) {
+	var (
+        moveForward,
+        moveBackward,
+        moveLeft,
+        moveRight bool 
+    )
 	w.SetKeyCallback(func (window *glfw.Window, key glfw.Key, scancode int, action glfw.Action, mods glfw.ModifierKey) {
+		switch key {
+        case glfw.KeyW:
+            moveForward = action != glfw.Release
+        case glfw.KeyS:
+            moveBackward = action != glfw.Release
+        case glfw.KeyA:
+            moveLeft = action != glfw.Release
+        case glfw.KeyD:
+            moveRight = action != glfw.Release
+        }
+	})
 
-		if key == glfw.KeyW && action == glfw.Press {
+	move =  func() {
+		if moveForward {
 			c.pos = c.pos.Add(c.front.Mul(c.speed))
 		}
-		if key == glfw.KeyS && action == glfw.Press {
+		if moveBackward {
 			c.pos = c.pos.Sub(c.front.Mul(c.speed))
 		}
-		if key == glfw.KeyA && action == glfw.Press {
-			c.pos = c.pos.Sub(((c.front.Cross(c.up)).Mul(c.speed)).Normalize())
+		if moveLeft {
+			c.pos = c.pos.Sub((c.front.Cross(c.up)).Mul(c.speed))
 		}
-		if key == glfw.KeyD && action == glfw.Press {
-			c.pos = c.pos.Add(((c.front.Cross(c.up)).Mul(c.speed)).Normalize())
+		if moveRight {
+			c.pos = c.pos.Add((c.front.Cross(c.up)).Mul(c.speed))
 		}
-	})
+	}
 }
+
 
 func (w *Window) EnableScale(p *Projection) {
 	w.SetScrollCallback(func(window *glfw.Window, xoff float64, yoff float64) {
