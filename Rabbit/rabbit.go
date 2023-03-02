@@ -1,7 +1,7 @@
 /*
  * @Author: lmio
  * @Date: 2023-02-18 16:43:54
- * @LastEditTime: 2023-03-01 16:01:25
+ * @LastEditTime: 2023-03-02 23:49:19
  * @FilePath: /opengl/Rabbit/rabbit.go
  * @Description:兔子模型
  */
@@ -73,7 +73,14 @@ func main() {
 		log.Fatalln("打开off文件失败:", err)
 	}
 
-	vao := glutils.CreateVertexArrayObject(vertices, indices)
+	vao := glutils.CreateVertexArrayObject(vertices)
+	glutils.BinfIndices(indices)
+
+	// 绑定顶点属性指针
+	gl.VertexAttribPointerWithOffset(0, 3, gl.FLOAT, false, 0, 0) // Position
+	//gl.VertexAttribPointerWithOffset(1, 3, gl.FLOAT, false, 4, 3*4) // Normal
+	gl.EnableVertexAttribArray(0)
+	//gl.EnableVertexAttribArray(1)
 
 	window.EnableScale(projection)
 	window.EnableMoveCameraFront(camera)
@@ -90,7 +97,7 @@ func main() {
 
 		// 绘制三角形
 		gl.BindVertexArray(vao)
-		gl.DrawElementsWithOffset(gl.TRIANGLES, int32(len(indices)), gl.UNSIGNED_INT, 0)
+		gl.DrawElementsWithOffset(gl.TRIANGLES, int32(len(indices)*3), gl.UNSIGNED_INT, 0)
 		gl.BindVertexArray(0)
 
 		// 处理窗口事件

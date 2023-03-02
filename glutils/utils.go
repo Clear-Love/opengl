@@ -1,7 +1,7 @@
 /*
  * @Author: lmio
  * @Date: 2023-03-01 00:17:21
- * @LastEditTime: 2023-03-01 00:23:33
+ * @LastEditTime: 2023-03-02 23:45:35
  * @FilePath: /opengl/glutils/utils.go
  * @Description:常用函数
  */
@@ -9,9 +9,11 @@ package glutils
 
 import (
 	"fmt"
-	"github.com/go-gl/gl/v4.1-core/gl"
 	"log"
 	"os"
+
+	"github.com/go-gl/gl/v4.1-core/gl"
+	"github.com/go-gl/mathgl/mgl32"
 )
 
 // initOpenGL 初始化 OpenGL
@@ -23,7 +25,7 @@ func InitOpenGL() {
 	log.Println("OpenGL version", version)
 }
 
-func ReadOFFFile(filename string) ([]float32, []uint32, []uint32, error) {
+func ReadOFFFile(filename string) (*Vertexs, []Indices, []Tetrahedras, error) {
 	// 打开文件
 	file, err := os.Open(filename)
 	if err != nil {
@@ -47,18 +49,21 @@ func ReadOFFFile(filename string) ([]float32, []uint32, []uint32, error) {
 	}
 
 	// 读取顶点坐标
-	vertices := make([]float32, numVertices*3)
+	position := make([]Position, numVertices)
 	for i := 0; i < numVertices; i++ {
-		if _, err := fmt.Fscanf(file, "%f %f %f\n", &vertices[i*3], &vertices[i*3+1], &vertices[i*3+2]); err != nil {
+		var x, y, z float32
+		_, err := fmt.Fscanf(file, "%f %f %f\n", &x, &y, &z)
+		position[i] = Position{mgl32.Vec3{x, y, z}}
+		if err != nil {
 			return nil, nil, nil, err
 		}
 	}
 
 	// 读取三角形索引
-	indices := make([]uint32, numFaces*3)
+	indices := make([]Indices, numFaces)
 	for i := 0; i < numFaces; i++ {
 		var n int
-		if _, err := fmt.Fscanf(file, "%d %d %d %d\n", &n, &indices[i*3], &indices[i*3+1], &indices[i*3+2]); err != nil {
+		if _, err := fmt.Fscanf(file, "%d %d %d %d\n", &n, &indices[i][0], &indices[i][1], &indices[i][2]); err != nil {
 			return nil, nil, nil, err
 		}
 		if n != 3 {
@@ -66,10 +71,10 @@ func ReadOFFFile(filename string) ([]float32, []uint32, []uint32, error) {
 		}
 	}
 	//读取四边形索引
-	tetrahedras := make([]uint32, numTetrahedra*4)
+	tetrahedras := make([]Tetrahedras, numTetrahedra*4)
 	for i := 0; i < numTetrahedra; i++ {
 		var n int
-		if _, err := fmt.Fscanf(file, "%d %d %d %d %d", &n, &tetrahedras[i*4], &tetrahedras[i*4+1], &tetrahedras[i*4+2], &tetrahedras[i*4+3]); err != nil {
+		if _, err := fmt.Fscanf(file, "%d %d %d %d %d", &n, &tetrahedras[i][0], &tetrahedras[i][1], &tetrahedras[i][2], &tetrahedras[i][3]); err != nil {
 			return nil, nil, nil, err
 		}
 		if n != 4 {
@@ -77,11 +82,18 @@ func ReadOFFFile(filename string) ([]float32, []uint32, []uint32, error) {
 		}
 	}
 
-	return vertices, indices, tetrahedras, nil
+	return NewVertexs(position), indices, tetrahedras, nil
 }
 
-// 给定顶点坐标和三角形索引，返回顶点数组对象
-func CreateVertexArrayObject(vertices []float32, indices []uint32) uint32 {
+func BinfIndices(indices []Indices) {
+	var ebo uint32
+	gl.GenBuffers(1, &ebo)
+	gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, ebo)
+	gl.BufferData(gl.ELEMENT_ARRAY_BUFFER, len(indices)*12, gl.Ptr(indices), gl.STATIC_DRAW)
+}
+
+// 给定顶点坐标，返回顶点数组对象
+func CreateVertexArrayObject(v *Vertexs) uint32 {
 	var vao uint32
 	gl.GenVertexArrays(1, &vao)
 	gl.BindVertexArray(vao)
@@ -89,18 +101,7 @@ func CreateVertexArrayObject(vertices []float32, indices []uint32) uint32 {
 	var vbo uint32
 	gl.GenBuffers(1, &vbo)
 	gl.BindBuffer(gl.ARRAY_BUFFER, vbo)
-	gl.BufferData(gl.ARRAY_BUFFER, len(vertices)*4, gl.Ptr(vertices), gl.STATIC_DRAW)
-
-	var ebo uint32
-	gl.GenBuffers(1, &ebo)
-	gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, ebo)
-	gl.BufferData(gl.ELEMENT_ARRAY_BUFFER, len(indices)*4, gl.Ptr(indices), gl.STATIC_DRAW)
-
-	// 定义顶点属性指针
-	var stride int32 = 3 * 4 // 每个顶点数据占用12个字节（3个float32）
-	var offset uintptr = 0
-	gl.VertexAttribPointerWithOffset(0, 3, gl.FLOAT, false, stride, offset)
-	gl.EnableVertexAttribArray(0)
+	gl.BufferData(gl.ARRAY_BUFFER, len(v.vertices)*v.attrLen*4, gl.Ptr(v.vertices), gl.STATIC_DRAW)
 
 	return vao
 }
