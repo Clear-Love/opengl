@@ -1,10 +1,18 @@
-#version 410
-layout (location = 0) in vec3 vert;
-uniform mat4 projection;
-uniform mat4 camera;
+#version 410 core
+layout (location = 0) in vec3 aPos;
+layout (location = 1) in vec3 aNormal;
+
+out vec3 FragPos;
+out vec3 Normal;
+
 uniform mat4 model;
-out vec4 vertColor;
-void main() {
-    vertColor = vec4(0.46, 0.51, 0.64, 1.0);
-    gl_Position = projection * camera * model * vec4(vert, 10.0);
+uniform mat4 camera;
+uniform mat4 projection;
+
+void main()
+{
+    FragPos = vec3(model * vec4(aPos, 1.0));
+    Normal = mat3(transpose(inverse(model))) * aNormal;  
+    
+    gl_Position = projection * camera * vec4(FragPos, 10.0);
 }

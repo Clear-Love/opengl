@@ -1,7 +1,7 @@
 /*
  * @Author: lmio
  * @Date: 2023-02-27 17:33:58
- * @LastEditTime: 2023-03-01 11:01:46
+ * @LastEditTime: 2023-03-03 14:26:29
  * @FilePath: /opengl/glutils/Shader.go
  * @Description:着色器类
  */
@@ -9,10 +9,12 @@ package glutils
 
 import (
 	"fmt"
-	"github.com/go-gl/gl/v4.1-core/gl"
 	"log"
 	"os"
 	"strings"
+
+	"github.com/go-gl/gl/v4.1-core/gl"
+	"github.com/go-gl/mathgl/mgl32"
 )
 
 type Shader struct {
@@ -28,7 +30,27 @@ func (s *Shader) Delete() {
 }
 
 func (s *Shader) GetUniform(name string) int32 {
-	return gl.GetUniformLocation(s.program, gl.Str(name))
+	return gl.GetUniformLocation(s.program, gl.Str(name+"\x00"))
+}
+
+func (s *Shader) SetVec3(name string, v0, v1, v2 float32) {
+	gl.Uniform3f(s.GetUniform(name), v0, v1, v2)
+}
+
+func (s *Shader) SetMat4(name string, value *float32) {
+	gl.UniformMatrix4fv(s.GetUniform(name), 1, false, value)
+}
+
+func (s *Shader) NewProject(name string, fovy float32, aspect float32, near float32, far float32) *Projection {
+	projection := mgl32.Perspective(mgl32.DegToRad(fovy), aspect, near, far)
+	return &Projection{
+		s.GetUniform(name),
+		projection,
+		fovy,
+		aspect,
+		near,
+		far,
+	}
 }
 
 // 读取着色器文件

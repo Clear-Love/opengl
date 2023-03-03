@@ -1,7 +1,7 @@
 /*
  * @Author: lmio
  * @Date: 2023-02-19 17:55:39
- * @LastEditTime: 2023-03-01 17:36:46
+ * @LastEditTime: 2023-03-03 14:45:09
  * @FilePath: /opengl/glutils/window.go
  * @Description:
  */
@@ -42,10 +42,15 @@ func NewWindow(width, height int) (*Window, error) {
 
 func (w *Window) Display(f func()) {
 	for !w.ShouldClose() {
+		// 处理按键移动
 		if move != nil {
 			move()
 		}
 		f()
+
+		//处理窗口事件
+		w.SwapBuffers()
+		glfw.PollEvents()
 	}
 }
 
@@ -88,7 +93,8 @@ func (w *Window) EnableMoveCameraFront(c *Camera) {
 
 		yaw += float32(xoffset)
 		pitch += float32(yoffset)
-
+		
+		// 避免万向节死锁
 		if pitch > 89 {
 			pitch = 89
 		}
@@ -110,6 +116,7 @@ func (w *Window) EnableMoveCameraPos(c *Camera) {
         moveForward,
         moveBackward,
         moveLeft,
+		moveUp,
         moveRight bool 
     )
 	w.SetKeyCallback(func (window *glfw.Window, key glfw.Key, scancode int, action glfw.Action, mods glfw.ModifierKey) {
@@ -122,6 +129,8 @@ func (w *Window) EnableMoveCameraPos(c *Camera) {
             moveLeft = action != glfw.Release
         case glfw.KeyD:
             moveRight = action != glfw.Release
+		case glfw.KeySpace:
+			moveUp = action != glfw.Release
         }
 	})
 
@@ -137,6 +146,9 @@ func (w *Window) EnableMoveCameraPos(c *Camera) {
 		}
 		if moveRight {
 			c.pos = c.pos.Add((c.front.Cross(c.up)).Mul(c.speed))
+		}
+		if moveUp {
+			c.pos = c.pos.Add(mgl32.Vec3{0, 1, 0}.Mul(c.speed))
 		}
 	}
 }

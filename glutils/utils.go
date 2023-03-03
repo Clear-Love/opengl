@@ -1,7 +1,7 @@
 /*
  * @Author: lmio
  * @Date: 2023-03-01 00:17:21
- * @LastEditTime: 2023-03-02 23:45:35
+ * @LastEditTime: 2023-03-03 11:21:55
  * @FilePath: /opengl/glutils/utils.go
  * @Description:常用函数
  */
@@ -25,7 +25,7 @@ func InitOpenGL() {
 	log.Println("OpenGL version", version)
 }
 
-func ReadOFFFile(filename string) (*Vertexs, []Indices, []Tetrahedras, error) {
+func ReadOFFFile(filename string) ([]Position, []Indices, []Tetrahedras, error) {
 	// 打开文件
 	file, err := os.Open(filename)
 	if err != nil {
@@ -82,7 +82,7 @@ func ReadOFFFile(filename string) (*Vertexs, []Indices, []Tetrahedras, error) {
 		}
 	}
 
-	return NewVertexs(position), indices, tetrahedras, nil
+	return position, indices, tetrahedras, nil
 }
 
 func BinfIndices(indices []Indices) {

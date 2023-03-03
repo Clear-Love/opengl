@@ -1,7 +1,7 @@
 /*
  * @Author: lmio
  * @Date: 2023-03-01 15:21:39
- * @LastEditTime: 2023-03-01 16:11:23
+ * @LastEditTime: 2023-03-03 14:25:25
  * @FilePath: /opengl/glutils/project.go
  * @Description:投影矩阵
  */
@@ -16,18 +16,6 @@ type Projection struct {
 	projectionUniform int32
 	mgl32.Mat4
 	fovy, aspect, near, far float32
-}
-
-func NewProject(projectionUniform int32, fovy float32, aspect float32, near float32, far float32) *Projection {
-	projection := mgl32.Perspective(mgl32.DegToRad(fovy), aspect, near, far)
-	return &Projection{
-		projectionUniform,
-		projection,
-		fovy,
-		aspect,
-		near,
-		far,
-	}
 }
 
 func (p *Projection) Reset() {
