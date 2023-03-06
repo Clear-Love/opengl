@@ -1,7 +1,7 @@
 /*
  * @Author: lmio
  * @Date: 2023-03-01 00:17:21
- * @LastEditTime: 2023-03-03 11:21:55
+ * @LastEditTime: 2023-03-06 21:22:43
  * @FilePath: /opengl/glutils/utils.go
  * @Description:常用函数
  */
@@ -25,7 +25,7 @@ func InitOpenGL() {
 	log.Println("OpenGL version", version)
 }
 
-func ReadOFFFile(filename string) ([]Position, []Indices, []Tetrahedras, error) {
+func ReadOFFFile(filename string) ([]mgl32.Vec3, []Indices, []Tetrahedras, error) {
 	// 打开文件
 	file, err := os.Open(filename)
 	if err != nil {
@@ -49,11 +49,11 @@ func ReadOFFFile(filename string) ([]Position, []Indices, []Tetrahedras, error) 
 	}
 
 	// 读取顶点坐标
-	position := make([]Position, numVertices)
+	position := make([]mgl32.Vec3, numVertices)
 	for i := 0; i < numVertices; i++ {
 		var x, y, z float32
 		_, err := fmt.Fscanf(file, "%f %f %f\n", &x, &y, &z)
-		position[i] = Position{mgl32.Vec3{x, y, z}}
+		position[i] = mgl32.Vec3{x, y, z}
 		if err != nil {
 			return nil, nil, nil, err
 		}

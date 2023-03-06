@@ -1,7 +1,7 @@
 /*
  * @Author: lmio
  * @Date: 2023-02-18 16:43:54
- * @LastEditTime: 2023-03-03 14:37:42
+ * @LastEditTime: 2023-03-06 21:24:10
  * @FilePath: /opengl/Rabbit/rabbit.go
  * @Description:兔子模型
  */
@@ -70,7 +70,7 @@ func main() {
 		log.Fatalln("打开off文件失败:", err)
 	}
 
-	vertices := glutils.NewVertexs(position)
+	vertices := glutils.NewVertexsBy3D(position)
 
 	vertices.Addattributev3(glutils.NewNormal(position, indices)) 
 	vao := glutils.CreateVertexArrayObject(vertices)

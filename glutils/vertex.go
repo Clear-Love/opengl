@@ -1,7 +1,7 @@
 /*
  * @Author: lmio
  * @Date: 2023-03-02 16:31:18
- * @LastEditTime: 2023-03-03 13:25:32
+ * @LastEditTime: 2023-03-06 21:24:45
  * @FilePath: /opengl/glutils/vertex.go
  * @Description:顶点结构
  */
@@ -12,36 +12,6 @@ import (
 
 	"github.com/go-gl/mathgl/mgl32"
 )
-
-// 位置属性
-type Position struct {
-    mgl32.Vec3	
-}
-
-// 法线属性
-type Normal struct {
-	mgl32.Vec3 
-}
-
-// 纹理坐标属性
-type TexCoord struct {
-	mgl32.Vec2 
-} 
-
-// 颜色属性
-type Color struct {
-	mgl32.Vec3 
-}  
-
-// 切线属性
-type Tangent struct {
-	mgl32.Vec3
-}
-
-// 双切线属性
-type Bitangent struct {
-	mgl32.Vec3 
-}
 
 // 三角形面
 type Indices [3]uint32 
@@ -56,13 +26,22 @@ type Vertexs struct {
 	attNum int 			// 顶点个数
 }
 
-func NewVertexs(position []Position) *Vertexs {
+func NewVertexsBy3D(position []mgl32.Vec3) *Vertexs {
 	vertices := make([]float32, 0, len(position)*3)
 	for _, val := range position {
 		vertices = append(vertices, val.X(), val.Y(), val.Z())
 	}
 	
 	return &Vertexs{vertices, 1, 3, len(position)}
+}
+
+func NewVertexsBy2D(position []mgl32.Vec2) *Vertexs {
+	vertices := make([]float32, 0, len(position)*2)
+	for _, val := range position {
+		vertices = append(vertices, val.X(), val.Y())
+	}
+	
+	return &Vertexs{vertices, 1, 2, len(position)}
 }
 
 func (v *Vertexs) Addattributev3(attribute []mgl32.Vec3) error {
@@ -99,7 +78,7 @@ func (v *Vertexs) Addattributev2(attribute []mgl32.Vec2) error {
 	return nil
 }
 
-func NewNormal(positions []Position, indices []Indices) []mgl32.Vec3 {
+func NewNormal(positions []mgl32.Vec3, indices []Indices) []mgl32.Vec3 {
     normals := make([]mgl32.Vec3, len(positions))
 	// 遍历所有三角形，计算每个三角形的法线向量，并将其添加到对应的顶点的法线向量上
 	for i := 0; i < len(indices); i++ {
@@ -109,8 +88,8 @@ func NewNormal(positions []Position, indices []Indices) []mgl32.Vec3 {
 		v2 := positions[ind[2]]
 		
 		// 通过叉乘计算法向量
-		e1 := v1.Sub(v0.Vec3)
-		e2 := v2.Sub(v0.Vec3)
+		e1 := v1.Sub(v0)
+		e2 := v2.Sub(v0)
 		normal := e1.Cross(e2).Normalize()
 		
 		// 添加法向量
